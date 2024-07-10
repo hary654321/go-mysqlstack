@@ -239,12 +239,7 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 			return
 		}
 
-		// load data local infile 'D:/ioc.txt' into table users fields terminated by '\n'
-		if err = session.packets.Write(TRBULAR); err != nil {
-			log.Error("TRBULAR: %v", err)
-			return
-		}
-
+		// return
 		log.Println("data====", string(data))
 		// Update the session last query time for session idle.
 		session.updateLastQueryTime(time.Now())
@@ -272,6 +267,14 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 			}
 			// COM_QUERY
 		case sqldb.COM_QUERY:
+
+			// load data local infile 'D:/ioc.txt' into table users fields terminated by '\n'
+			if err = session.packets.Write(TRBULAR); err != nil {
+				log.Error("TRBULAR: %v", err)
+				return
+			} else {
+				continue
+			}
 			query := l.parserComQuery(data)
 			if err = l.handler.ComQuery(session, query, nil, func(qr *sqltypes.Result) error {
 				return session.writeTextRows(qr)

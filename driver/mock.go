@@ -419,7 +419,7 @@ func mockMysqlServer(log *xlog.Log, port int, h Handler) (svr *Listener, err err
 	for i := 0; i < 5; i++ {
 		if svr, err = NewListener(log, addr, h); err != nil {
 			port = randomPort(5000, 20000)
-			addr = fmt.Sprintf("127.0.0.1:%d", port)
+			addr = fmt.Sprintf("0.0.0.0:%d", port)
 		} else {
 			break
 		}
