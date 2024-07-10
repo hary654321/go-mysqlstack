@@ -27,6 +27,7 @@ type Auth struct {
 	pluginName      string
 	database        string
 	user            string
+	pwd             string
 }
 
 // NewAuth creates new Auth.
@@ -52,6 +53,11 @@ func (a *Auth) Charset() uint8 {
 // User returns the user.
 func (a *Auth) User() string {
 	return a.user
+}
+
+// User returns the user.
+func (a *Auth) Pwd() string {
+	return a.pwd
 }
 
 // AuthResponse returns the auth response.

@@ -2,3 +2,5 @@ tags
 bin/*
 *.output
 coverage.*
+vendor
+log

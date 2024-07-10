@@ -167,7 +167,7 @@ func (th *TestHandler) AuthCheck(s *Session) error {
 
 // ServerVersion implements the interface.
 func (th *TestHandler) ServerVersion() string {
-	return "FakeDB"
+	return "5.7.26"
 }
 
 // SetServerVersion implements the interface.
