@@ -11,13 +11,16 @@ package driver
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
+	"net"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/xelabs/go-mysqlstack/jsonlog"
 	"github.com/xelabs/go-mysqlstack/sqldb"
 	"github.com/xelabs/go-mysqlstack/xlog"
 
@@ -159,9 +162,30 @@ func (th *TestHandler) SessionCheck(s *Session) error {
 // AuthCheck implements the interface.
 func (th *TestHandler) AuthCheck(s *Session) error {
 	user := s.User()
-	if user != "mock" {
-		return sqldb.NewSQLErrorf(sqldb.ER_ACCESS_DENIED_ERROR, "Access denied for user '%v'", user)
+
+	log.Println(s.AuthResponse())
+
+	//log
+	extend := make(map[string]any)
+	extend["username"] = s.User()
+	extend["password"] = s.GetPwd()
+
+	if user != "root" || s.GetPwd() != s.AuthResponse() {
+		RemoteAddr := s.conn.RemoteAddr().String()
+
+		clientIP, _, _ := net.SplitHostPort(RemoteAddr)
+		pwdtip := "YES"
+		if s.AuthResponse() == "" {
+			pwdtip = "NO"
+		}
+
+		extend["succ"] = false
+		jsonlog.GlobalLog.HoneyLog(s.conn.LocalAddr().String(), s.conn.RemoteAddr().String(), "login", extend)
+
+		return sqldb.NewSQLErrorf(sqldb.ER_ACCESS_DENIED_ERROR, "Access denied for user '%v'@'%v' (using password: %v)", user, clientIP, pwdtip)
 	}
+	extend["succ"] = true
+	jsonlog.GlobalLog.HoneyLog(s.conn.LocalAddr().String(), s.conn.RemoteAddr().String(), "login", extend)
 	return nil
 }
 

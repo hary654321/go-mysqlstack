@@ -168,31 +168,25 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 	// Greeting packet.
 	greetingPkt = session.greeting.Pack()
 
-	jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "scan", nil)
-
 	if err = session.packets.Write(greetingPkt); err != nil {
+		jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "scan", nil)
 		log.Error("server.write.greeting.packet.error: %v", err)
 		return
 	}
 
 	// Auth packet.
 	if authPkt, err = session.packets.Next(); err != nil {
+		jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "scan", nil)
 		log.Error("server.read.auth.packet.error: %v", err)
 		return
 	}
 	if err = session.auth.UnPack(authPkt); err != nil {
+		jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "scan", nil)
 		log.Error("server.unpack.auth.error: %v", err)
 		return
 	}
 
 	//  Auth check.
-	log.Println(session)
-
-	extend := make(map[string]any)
-	extend["username"] = session.User()
-	extend["password"] = session.Pwd()
-
-	jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "scan", nil)
 
 	if err = l.handler.AuthCheck(session); err != nil {
 		log.Warning("server.user[%+v].auth.check.failed", session.User())

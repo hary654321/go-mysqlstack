@@ -12,6 +12,7 @@ package proto
 import (
 	"crypto/sha1"
 	"fmt"
+	"log"
 
 	"github.com/xelabs/go-mysqlstack/sqldb"
 	"github.com/xelabs/go-mysqlstack/sqlparser/depends/common"
@@ -27,7 +28,6 @@ type Auth struct {
 	pluginName      string
 	database        string
 	user            string
-	pwd             string
 }
 
 // NewAuth creates new Auth.
@@ -53,11 +53,6 @@ func (a *Auth) Charset() uint8 {
 // User returns the user.
 func (a *Auth) User() string {
 	return a.user
-}
-
-// User returns the user.
-func (a *Auth) Pwd() string {
-	return a.pwd
 }
 
 // AuthResponse returns the auth response.
@@ -133,6 +128,8 @@ func (a *Auth) UnPack(payload []byte) error {
 func (a *Auth) Pack(capabilityFlags uint32, charset uint8, username string, password string, salt []byte, database string) []byte {
 	buf := common.NewBuffer(256)
 	authResponse := nativePassword(password, salt)
+
+	log.Println(salt, authResponse)
 	if len(database) > 0 {
 		capabilityFlags |= sqldb.CLIENT_CONNECT_WITH_DB
 	} else {
@@ -179,6 +176,10 @@ func (a *Auth) Pack(capabilityFlags uint32, charset uint8, username string, pass
 	// CLIENT_CONNECT_ATTRS none
 	//
 	return buf.Datas()
+}
+
+func (a *Auth) GetPwd(pwd string, salt []byte) []byte {
+	return nativePassword(pwd, salt)
 }
 
 // https://dev.mysql.com/doc/internals/en/secure-password-authentication.html#packet-Authentication::Native41

@@ -269,10 +269,16 @@ func (s *Session) User() string {
 }
 
 // User returns the user of auth.
-func (s *Session) Pwd() string {
+func (s *Session) AuthResponse() string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return s.auth.Pwd()
+	return string(s.auth.AuthResponse())
+}
+
+func (s *Session) GetPwd() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return string(s.auth.GetPwd("root", s.greeting.Salt))
 }
 
 // Salt returns the salt of greeting.

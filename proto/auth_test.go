@@ -102,7 +102,9 @@ func TestAuthUnpackError(t *testing.T) {
 		assert.Equal(t, want, got)
 	}
 }
-
+func TestNativePasswordk(t *testing.T) {
+	println(nativePassword("root", DefaultSalt))
+}
 func TestAuthUnPack(t *testing.T) {
 	want := NewAuth()
 	want.charset = 0x02
