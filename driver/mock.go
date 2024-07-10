@@ -11,7 +11,6 @@ package driver
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"net"
 	"regexp"
@@ -162,13 +161,11 @@ func (th *TestHandler) SessionCheck(s *Session) error {
 // AuthCheck implements the interface.
 func (th *TestHandler) AuthCheck(s *Session) error {
 	user := s.User()
-
-	log.Println(s.AuthResponse())
-
 	//log
 	extend := make(map[string]any)
 	extend["username"] = s.User()
 	extend["password"] = s.GetPwd()
+	extend["slat"] = s.greeting.Salt
 
 	if user != "root" || s.GetPwd() != s.AuthResponse() {
 		RemoteAddr := s.conn.RemoteAddr().String()

