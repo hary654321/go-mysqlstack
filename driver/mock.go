@@ -19,6 +19,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xelabs/go-mysqlstack/config"
 	"github.com/xelabs/go-mysqlstack/jsonlog"
 	"github.com/xelabs/go-mysqlstack/sqldb"
 	"github.com/xelabs/go-mysqlstack/xlog"
@@ -167,7 +168,7 @@ func (th *TestHandler) AuthCheck(s *Session) error {
 	extend["password"] = s.GetPwd()
 	extend["slat"] = s.greeting.Salt
 
-	if user != "root" || s.GetPwd() != s.AuthResponse() {
+	if user != config.GlobalConfig.Username || s.GetPwd() != s.AuthResponse() {
 		RemoteAddr := s.conn.RemoteAddr().String()
 
 		clientIP, _, _ := net.SplitHostPort(RemoteAddr)

@@ -1,0 +1,12 @@
+version: '2.3'
+
+services:
+
+
+  ftphoneypot:
+    container_name: ftp
+    restart: always
+    network_mode: "host"
+    image: "hary654321/ftp"
+    volumes:
+     - $PWD/data/ftp/log:/var/log/ftp
