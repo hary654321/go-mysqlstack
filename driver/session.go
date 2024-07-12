@@ -289,6 +289,16 @@ func (s *Session) Salt() []byte {
 	return s.greeting.Salt
 }
 
+// Salt returns the salt of greeting.
+func (s *Session) RemoteIP() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	ip, _, _ := net.SplitHostPort(s.conn.RemoteAddr().String())
+
+	return ip
+}
+
 // Scramble returns the scramble of auth.
 func (s *Session) Scramble() []byte {
 	s.mu.RLock()

