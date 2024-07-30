@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-07-10 10:09:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-07-10 16:31:16
+ * @LastEditTime: 2024-07-30 16:46:36
  */
 /*
  * go-mysqlstack
@@ -41,8 +41,15 @@ func main() {
 	result2 := mock.ConnectionID()
 	th.AddQuery("SELECT CONNECTION_ID()", result2)
 
-	result3 := mock.ShowVal()
+	result3 := mock.ShowVal("showval.json")
 	th.AddQuery("SHOW VARIABLES", result3)
+
+	result4 := mock.ShowVal("showstatus.json")
+	th.AddQuery("SHOW STATUS", result4)
+	th.AddQuery("SHOW  STATUS", result4)
+
+	result5 := mock.ShowVal("showDatabase.json")
+	th.AddQuery("SHOW DATABASES", result5)
 
 	mysqld, err := driver.MockMysqlServerWithPort(log, 4407, th)
 	if err != nil {

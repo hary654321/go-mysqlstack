@@ -1,3 +1,11 @@
+/*
+ * @Description:
+ * @Version: 2.0
+ * @Autor: ABing
+ * @Date: 2024-07-10 16:35:27
+ * @LastEditors: lhl
+ * @LastEditTime: 2024-07-30 16:35:54
+ */
 package mock
 
 import (
@@ -55,12 +63,12 @@ type ShowV struct {
 	} `json:"rows"`
 }
 
-func ShowVal() *sqltypes.Result {
+func ShowVal(jsonfile string) *sqltypes.Result {
 
 	var showV ShowV
 
 	// 解析 JSON 数据到 User 实例
-	err := json.Unmarshal(utils.Read("showval.json"), &showV)
+	err := json.Unmarshal(utils.Read(jsonfile), &showV)
 	if err != nil {
 		panic(err)
 	}
