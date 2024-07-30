@@ -7,8 +7,8 @@ services:
     container_name: mysqld
     restart: always
     network_mode: "host"
-    image: "hary654321/mysqld"
+    image: "hary654321/mysql"
     volumes:
      - $PWD/data/mysql/log:/var/log/mysqld
     environment:
-      HP_LOG_PATH: "/var/log/mysqld/mysqld.json"
+      HP_LOG_PATH: "/var/log/mysql/mysql.json"

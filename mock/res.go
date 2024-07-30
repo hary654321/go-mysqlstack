@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-07-10 16:35:27
  * @LastEditors: lhl
- * @LastEditTime: 2024-07-30 16:35:54
+ * @LastEditTime: 2024-07-30 17:50:38
  */
 package mock
 
@@ -83,6 +83,49 @@ func ShowVal(jsonfile string) *sqltypes.Result {
 	for k, v := range showV.Rows {
 		rows[k] = append(rows[k], sqltypes.MakeTrusted(querypb.Type_VARCHAR, []byte(v.VariableName)))
 		rows[k] = append(rows[k], sqltypes.MakeTrusted(querypb.Type_VARCHAR, []byte(v.Value)))
+	}
+
+	return &sqltypes.Result{
+		Fields: []*querypb.Field{
+			{
+				Name: "Variable_name",
+				Type: querypb.Type_VARCHAR,
+			},
+			{
+				Name: "Value",
+				Type: querypb.Type_VARCHAR,
+			},
+		},
+		Rows: rows,
+	}
+}
+
+type DataBase struct {
+	Table string `json:"table"`
+	Rows  []struct {
+		Database string `json:"Database"`
+	} `json:"rows"`
+}
+
+func ShowDataBase(jsonfile string) *sqltypes.Result {
+
+	var showV DataBase
+
+	// 解析 JSON 数据到 User 实例
+	err := json.Unmarshal(utils.Read(jsonfile), &showV)
+	if err != nil {
+		panic(err)
+	}
+
+	var rows [][]sqltypes.Value
+
+	// 确保rows有足够的行，并且每一行都初始化为一个空切片
+	for range showV.Rows {
+		rows = append(rows, []sqltypes.Value{}) // 初始化每一行为空切片
+	}
+
+	for k, v := range showV.Rows {
+		rows[k] = append(rows[k], sqltypes.MakeTrusted(querypb.Type_VARCHAR, []byte(v.Database)))
 	}
 
 	return &sqltypes.Result{

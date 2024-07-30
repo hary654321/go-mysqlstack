@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-07-10 10:09:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-07-30 17:19:22
+ * @LastEditTime: 2024-07-30 17:59:04
  */
 /*
  * go-mysqlstack
@@ -49,7 +49,7 @@ func main() {
 	th.AddQuery("SHOW STATUS", result4)
 	th.AddQuery("SHOW  STATUS", result4)
 
-	result5 := mock.ShowVal("showDatabase.json")
+	result5 := mock.ShowDataBase("showDatabase.json")
 	th.AddQuery("SHOW DATABASES", result5)
 
 	mysqld, err := driver.MockMysqlServerWithPort(log, utils.GetHpPort(), th)

@@ -11,5 +11,5 @@ WORKDIR /opt/mysql
 CMD ./mysqld
 
 # CMD tail -f
-# docker build -t hary654321/mysqld  .
+# docker build -t hary654321/mysql  .
 
