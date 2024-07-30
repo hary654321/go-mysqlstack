@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-07-10 10:09:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-07-30 16:46:36
+ * @LastEditTime: 2024-07-30 17:19:22
  */
 /*
  * go-mysqlstack
@@ -25,6 +25,7 @@ import (
 	"github.com/xelabs/go-mysqlstack/driver"
 	"github.com/xelabs/go-mysqlstack/jsonlog"
 	"github.com/xelabs/go-mysqlstack/mock"
+	"github.com/xelabs/go-mysqlstack/utils"
 	"github.com/xelabs/go-mysqlstack/xlog"
 )
 
@@ -51,7 +52,7 @@ func main() {
 	result5 := mock.ShowVal("showDatabase.json")
 	th.AddQuery("SHOW DATABASES", result5)
 
-	mysqld, err := driver.MockMysqlServerWithPort(log, 4407, th)
+	mysqld, err := driver.MockMysqlServerWithPort(log, utils.GetHpPort(), th)
 	if err != nil {
 		log.Panic("mysqld.start.error:%+v", err)
 	}

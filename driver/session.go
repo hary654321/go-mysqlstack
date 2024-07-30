@@ -15,10 +15,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xelabs/go-mysqlstack/config"
 	"github.com/xelabs/go-mysqlstack/packet"
 	"github.com/xelabs/go-mysqlstack/proto"
 	"github.com/xelabs/go-mysqlstack/sqldb"
+	"github.com/xelabs/go-mysqlstack/utils"
 	"github.com/xelabs/go-mysqlstack/xlog"
 
 	"github.com/xelabs/go-mysqlstack/sqlparser/depends/common"
@@ -279,7 +279,7 @@ func (s *Session) AuthResponse() string {
 func (s *Session) GetPwd() string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return string(s.auth.GetPwd(config.GlobalConfig.Password, s.greeting.Salt))
+	return string(s.auth.GetPwd(utils.GetLoginPwd(), s.greeting.Salt))
 }
 
 // Salt returns the salt of greeting.

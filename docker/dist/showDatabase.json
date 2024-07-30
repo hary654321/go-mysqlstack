@@ -1,0 +1,44 @@
+{
+    "table": "SCHEMATA",
+    "rows": [
+        {
+            "Database": "information_schema"
+        },
+        {
+            "Database": "a"
+        },
+        {
+            "Database": "apt"
+        },
+        {
+            "Database": "center"
+        },
+        {
+            "Database": "cmf"
+        },
+        {
+            "Database": "crocodile"
+        },
+        {
+            "Database": "cyberspace"
+        },
+        {
+            "Database": "edr"
+        },
+        {
+            "Database": "ls"
+        },
+        {
+            "Database": "mysql"
+        },
+        {
+            "Database": "performance_schema"
+        },
+        {
+            "Database": "server"
+        },
+        {
+            "Database": "sys"
+        }
+    ]
+}

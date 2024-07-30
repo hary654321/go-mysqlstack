@@ -3,10 +3,12 @@ version: '2.3'
 services:
 
 
-  ftphoneypot:
-    container_name: ftp
+  mysqlhoneypot:
+    container_name: mysqld
     restart: always
     network_mode: "host"
-    image: "hary654321/ftp"
+    image: "hary654321/mysqld"
     volumes:
-     - $PWD/data/ftp/log:/var/log/ftp
+     - $PWD/data/mysql/log:/var/log/mysqld
+    environment:
+      HP_LOG_PATH: "/var/log/mysqld/mysqld.json"

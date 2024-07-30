@@ -2,14 +2,14 @@ FROM ubuntu:20.04
 #
 # Setup redishoneypot
 #
-COPY ftp /opt/ftp/
-COPY ftpserver.json /opt/ftp/
+COPY mysqld /opt/mysql/
+COPY dist/* /opt/mysql/
 
 # Start redishoneypot
-WORKDIR /opt/ftp
+WORKDIR /opt/mysql
 
-CMD ./ftp
+CMD ./mysqld
 
 # CMD tail -f
-# docker build -t hary654321/ftp  .
+# docker build -t hary654321/mysqld  .
 

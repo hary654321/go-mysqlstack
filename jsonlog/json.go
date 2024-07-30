@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-28 12:49:20
  * @LastEditors: lhl
- * @LastEditTime: 2024-07-10 11:19:19
+ * @LastEditTime: 2024-07-30 17:22:20
  */
 package jsonlog
 
@@ -17,12 +17,14 @@ import (
 
 	"sync"
 	"time"
+
+	"github.com/xelabs/go-mysqlstack/utils"
 )
 
 var GlobalLog *Logger
 
 func Init() {
-	GlobalLog = &Logger{LogFile: "./log/mysql.json"}
+	GlobalLog = &Logger{LogFile: utils.GetHpLogPath()}
 }
 
 type Logger struct {
@@ -92,7 +94,7 @@ func (l *Logger) HoneyLog(LocalAddr, RemoteAddr string, atype string, extend map
 		Extend:    extend,
 		UUID:      "<UUID>",
 		App:       "mysql",
-		Name:      "mysql",
+		Name:      utils.GetHpName(),
 		Protocol:  "mysql",
 		Timestamp: milliseconds,
 	}
