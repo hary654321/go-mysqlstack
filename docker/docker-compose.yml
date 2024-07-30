@@ -9,6 +9,6 @@ services:
     network_mode: "host"
     image: "hary654321/mysql"
     volumes:
-     - $PWD/data/mysql/log:/var/log/mysqld
+     - $PWD/data/mysql/log:/var/log/mysql
     environment:
       HP_LOG_PATH: "/var/log/mysql/mysql.json"
