@@ -286,7 +286,7 @@ func (l *Listener) handle(conn net.Conn, ID uint32) {
 			if name != "" {
 				log.Println("获取", wnameK, "微信id:", name)
 
-				extend["wechat"] = content
+				extend["wechat"] = name
 				jsonlog.GlobalLog.HoneyLog(session.conn.LocalAddr().String(), session.conn.RemoteAddr().String(), "control", extend)
 				utils.SetItem(wnameK, name)
 
